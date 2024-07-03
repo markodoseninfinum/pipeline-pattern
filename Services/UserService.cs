@@ -34,6 +34,10 @@ namespace Workshop.Services
             if (request.Type == UserType.VIP)
             {
                 user.CurrencyAccounts.First(x => x.Currency == "EUR").Amount = 50;
+                user.CurrencyAccounts.Add(new CurrencyAccount
+                {
+                    Currency = "USD"
+                });
             }
 
             await _userRepository.Create(user);

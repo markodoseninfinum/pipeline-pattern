@@ -30,7 +30,7 @@ namespace Workshop.Tests.Services
 
             var result = await _sut.Create(request);
 
-            result.CurrencyAccounts.Should().Satisfy(x => x.Currency == "EUR");
+            result.CurrencyAccounts.First().Currency.Should().Be("EUR");
         }
 
         [Theory]
@@ -90,6 +90,20 @@ namespace Workshop.Tests.Services
             var result = await _sut.Create(request);
 
             result.CurrencyAccounts.First(x => x.Currency == "EUR").Amount.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task Create_WhenTypeIsVIP_ThenCreateUserWithUsdAccount()
+        {
+            var request = new CreateUserRequest
+            {
+                Name = Guid.NewGuid().ToString(),
+                Type = UserType.VIP,
+            };
+
+            var result = await _sut.Create(request);
+
+            result.CurrencyAccounts.Should().Contain(x => x.Currency == "USD");
         }
     }
 }
