@@ -26,6 +26,16 @@ namespace Workshop.Services
                 Type = request.Type,
             };
 
+            if (request.Type == UserType.Premium)
+            {
+                user.CurrencyAccounts.First(x => x.Currency == "EUR").Amount = 5;
+            }
+
+            if (request.Type == UserType.VIP)
+            {
+                user.CurrencyAccounts.First(x => x.Currency == "EUR").Amount = 50;
+            }
+
             await _userRepository.Create(user);
 
             return user;

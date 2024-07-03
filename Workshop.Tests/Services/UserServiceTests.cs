@@ -49,5 +49,47 @@ namespace Workshop.Tests.Services
 
             _repositoryMock.Verify(x => x.Create(It.IsAny<User>()), Times.Once);
         }
+
+        [Fact]
+        public async Task Create_WhenTypeIsPremium_ThenCreateUserWith5Eur()
+        {
+            var request = new CreateUserRequest
+            {
+                Name = Guid.NewGuid().ToString(),
+                Type = UserType.Premium,
+            };
+
+            var result = await _sut.Create(request);
+
+            result.CurrencyAccounts.First(x => x.Currency == "EUR").Amount.Should().Be(5);
+        }
+
+        [Fact]
+        public async Task Create_WhenTypeIsVIP_ThenCreateUserWith50Eur()
+        {
+            var request = new CreateUserRequest
+            {
+                Name = Guid.NewGuid().ToString(),
+                Type = UserType.VIP,
+            };
+
+            var result = await _sut.Create(request);
+
+            result.CurrencyAccounts.First(x => x.Currency == "EUR").Amount.Should().Be(50);
+        }
+
+        [Fact]
+        public async Task Create_WhenTypeIsBasic_ThenCreateUserWith0Eur()
+        {
+            var request = new CreateUserRequest
+            {
+                Name = Guid.NewGuid().ToString(),
+                Type = UserType.Basic,
+            };
+
+            var result = await _sut.Create(request);
+
+            result.CurrencyAccounts.First(x => x.Currency == "EUR").Amount.Should().Be(0);
+        }
     }
 }
