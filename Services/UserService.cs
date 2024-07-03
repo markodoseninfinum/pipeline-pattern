@@ -1,4 +1,6 @@
 ﻿using Workshop.Models;
+using Workshop.Pipelines;
+using Workshop.Pipelines.UserPipelines;
 
 namespace Workshop.Services
 {
@@ -19,39 +21,30 @@ namespace Workshop.Services
         {
             var user = new User
             {
-                CurrencyAccounts = new List<CurrencyAccount>()
-                {
-                    new CurrencyAccount
-                    {
-                        Currency = "EUR"
-                    },
-                },
                 Name = request.Name,
                 Type = request.Type,
             };
 
-            if (request.Type == UserType.Premium)
-            {
-                user.CurrencyAccounts.First(x => x.Currency == "EUR").Amount = 5;
-            }
+            var pipeline = CreatePipeline(user.Type);
 
-            if (request.Type == UserType.VIP)
-            {
-                user.CurrencyAccounts.First(x => x.Currency == "EUR").Amount = 50;
-                user.CurrencyAccounts.Add(new CurrencyAccount
-                {
-                    Currency = "USD"
-                });
-            }
-
-            await _userRepository.Create(user);
-
-            if (request.Type == UserType.VIP || request.Type == UserType.Premium)
-            {
-                await _emailService.SendWelcomeEmail(user);
-            }
+            await pipeline.Execute(user);
 
             return user;
+        }
+
+        private IPipelineService<User> CreatePipeline(UserType type)
+        {
+            switch (type)
+            {
+                case UserType.Basic:
+                    return new BasicUserPipeline(_userRepository);
+                case UserType.Premium:
+                    return new PremiumUserPipeline(_userRepository, _emailService);
+                case UserType.VIP:
+                    return new VIPUserPipeline(_userRepository, _emailService);
+                default:
+                    throw new NotImplementedException();
+            }
         }
     }
 }
